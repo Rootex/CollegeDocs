@@ -1,0 +1,64 @@
+import string
+import os
+import matplotlib.pyplot as plt
+from collections import Counter
+
+DATA_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data/')
+
+
+def punctuation_strip(path):
+    f = open(path)
+    data = f.read()
+    for c in string.punctuation:
+        data = data.replace(c, "")
+    data = data.lower()
+    out_f = open(path + ".new", 'w')
+    out_f.write(data)
+    out_f.close()
+
+
+def generate_frequency(path):
+    with open(path) as f:
+        data = f.read()
+        freqs = Counter(data.split())
+        return freqs
+
+
+# Removing of punctuations and case
+punctuation_strip(DATA_PATH + "faust_de.txt")
+punctuation_strip(DATA_PATH + "faust_en.txt")
+punctuation_strip(DATA_PATH + "faust_fin.txt")
+
+# data
+# frequency
+freq_de = sorted(dict(generate_frequency(DATA_PATH + "faust_de.txt.new")).values(), reverse=True)
+freq_en = sorted(dict(generate_frequency(DATA_PATH + "faust_en.txt.new")).values(), reverse=True)
+freq_fin = sorted(dict(generate_frequency(DATA_PATH + "faust_fin.txt.new")).values(), reverse=True)
+
+# rank
+rank_de = range(1, len(freq_de) + 1)
+rank_en = range(1, len(freq_en) + 1)
+rank_fin = range(1, len(freq_fin) + 1)
+
+# Zipf's constant
+de_f = [freq_de[0], freq_de[len(freq_de)-1]]
+de_r = [rank_de[0], rank_de[len(rank_de)-1]]
+en_f = [freq_en[0], freq_en[len(freq_en)-1]]
+en_r = [rank_en[0], rank_en[len(rank_en)-1]]
+fin_f = [freq_fin[0], freq_fin[len(freq_fin)-1]]
+fin_r = [rank_fin[0], rank_fin[len(rank_fin)-1]]
+
+# graph
+plt.yscale('log', nonposy="clip")
+plt.xscale('log', nonposx="clip")
+plt.scatter(rank_de, freq_de, marker='8', color='r', label='DE')
+plt.plot(de_r, de_f, color='r', label='Fit DE')
+plt.scatter(rank_en, freq_en, marker='+', color='g', label='EN')
+plt.plot(en_r, en_f, color='g', label='Fit EN')
+plt.scatter(rank_fin, freq_fin, marker='*', color='b', label='FIN')
+plt.plot(fin_r, fin_f, color='b', label='Fit FIN')
+plt.legend(loc='upper right')
+plt.xlabel("Rank")
+plt.ylabel("Frequency")
+plt.title("Word Frequency")
+plt.show()
